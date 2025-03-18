@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Residuos Urbanos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Gestión de Residuos Urbanos</h1>
+        <nav>
+            <ul>
+                <li><a href="#inicio">Inicio</a></li>
+                <li><a href="#reportes">Reportar Residuos</a></li>
+                <li><a href="#contacto">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <section id="inicio">
+        <h2>Bienvenido a la Plataforma</h2>
+        <p>Ayúdanos a mantener limpia la ciudad reportando los puntos donde se necesita recolección de residuos.</p>
+    </section>
+
+    <section id="reportes">
+        <h2>Reportar Punto de Residuos</h2>
+        <form id="reporteForm">
+            <label for="ubicacion">Ubicación:</label>
+            <input type="text" id="ubicacion" required>
+            
+            <label for="descripcion">Descripción:</label>
+            <textarea id="descripcion" required></textarea>
+
+            <button type="submit">Enviar Reporte</button>
+        </form>
+    </section>
+
+    <section id="contacto">
+        <h2>Contacto</h2>
+        <p>Si tienes dudas o sugerencias, contáctanos.</p>
+        <form>
+            <input type="text" placeholder="Nombre" required>
+            <input type="email" placeholder="Correo" required>
+            <textarea placeholder="Mensaje"></textarea>
+            <button type="submit">Enviar</button>
+        </form>
+    </section>
+    <section id="mapa">
+        <h2>Mapa de Contenedores de Residuos</h2>
+        <div id="map" style="height: 400px;"></div>
+    </section>
+    
+    <script>
+        var map = L.map('map').setView([19.355, -99.092], 13); // Coordenadas de Iztapalapa
+    
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+    
+        fetch('http://localhost:3000/api/contenedores') // Datos desde el backend
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(contenedor => {
+                    L.marker([contenedor.lat, contenedor.lng])
+                    .addTo(map)
+                    .bindPopup(`<b>${contenedor.ubicacion}</b><br>${contenedor.estado}`);
+                });
+            })
+            .catch(error => console.error("Error al cargar el mapa:", error));
+    </script>
+<section id="estadisticas">
+    <h2>Estadísticas de Residuos Recogidos</h2>
+    <canvas id="graficoResiduos"></canvas>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    fetch('http://localhost:3000/api/estadisticas')
+        .then(response => response.json())
+        .then(data => {
+            var ctx = document.getElementById('graficoResiduos').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: data.categorias,
+                    datasets: [{
+                        label: 'Toneladas Recogidas',
+                        data: data.valores,
+                        backgroundColor: ['#4CAF50', '#FF9800', '#2196F3', '#F44336'],
+                    }]
+                }
+            });
+        })
+        .catch(error => console.error("Error al cargar estadísticas:", error));
+</script>
+    
+   
+
+    <script src="script.js"></script>
+</body>
+</html>
+
+
